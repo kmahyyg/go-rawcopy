@@ -5,6 +5,7 @@ RawCopy - Golang implementation
 # Dependencies
 
 ```bash
+go mod init github.com/kmahyyg/go-rawcopy
 go get -u golang.org/x/sys/windows
 go get -u www.velocidex.com/golang/go-ntfs
 ```
