@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/user"
 	"regexp"
 	"strings"
 
@@ -22,13 +23,27 @@ const (
 )
 
 var (
-	inFile                       = flag.String("in", "", "input file")
-	outFile                      = flag.String("out", "", "output file")
-	ErrReturnedNil               = errors.New("result returned nil reference")
-	ErrInvalidInput              = errors.New("invalid input")
-	ErrDeviceInaccessible        = errors.New("raw device is not accessible")
-	SoftVersion           string = ""
+	inFile                            = flag.String("in", "", "input file")
+	outFile                           = flag.String("out", "", "output file")
+	ErrReturnedNil                    = errors.New("result returned nil reference")
+	ErrInvalidInput                   = errors.New("invalid input")
+	ErrDeviceInaccessible             = errors.New("raw device is not accessible")
+	ErrPrivilegedAccountWanted        = errors.New("require privileged token, please uac elevate")
+	SoftVersion                string = ""
 )
+
+func CheckIfElevated() error {
+	u, err := user.Current()
+	if err != nil {
+		return err
+	}
+	log.Printf("Current running as: %s (%s) ", u.Name, u.Username)
+	if !windows.GetCurrentProcessToken().IsElevated() {
+		return ErrPrivilegedAccountWanted
+	}
+	log.Println("Current process already elevated to administrator, go ahead.")
+	return nil
+}
 
 func init() {
 	flag.Parse()
@@ -37,6 +52,9 @@ func init() {
 
 func main() {
 	log.Println("go-rawcopy by kmahyyg (2022) - " + SoftVersion)
+	if err := CheckIfElevated(); err != nil {
+		panic(err)
+	}
 	npath := EnsureNTFSPath(*inFile)
 	// fullpath can leave with prefixing backslash, and this library require file path in slash (*nix format)
 	npathRela := strings.Join(npath[1:], "//")
