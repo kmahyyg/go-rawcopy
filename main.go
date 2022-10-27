@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	inFile                       = flag.String("in", `C:\Windows\System32\config\SYSTEM`, "input file")
-	outFile                      = flag.String("out", `H:\output\system-c.hive`, "output file")
+	inFile                       = flag.String("in", "", "input file")
+	outFile                      = flag.String("out", "", "output file")
 	ErrReturnedNil               = errors.New("result returned nil reference")
 	ErrInvalidInput              = errors.New("invalid input")
 	ErrDeviceInaccessible        = errors.New("raw device is not accessible")
@@ -36,6 +36,7 @@ func init() {
 }
 
 func main() {
+	log.Println("go-rawcopy by kmahyyg (2022) - " + SoftVersion)
 	npath := EnsureNTFSPath(*inFile)
 	// fullpath can leave with prefixing backslash, and this library require file path in slash (*nix format)
 	npathRela := strings.Join(npath[1:], "//")
